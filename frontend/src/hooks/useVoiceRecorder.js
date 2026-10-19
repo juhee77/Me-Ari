@@ -1,5 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { formatDuration, normalizeAnalysisResult } from '../utils/diaryHelpers.js';
+import {
+  formatDuration,
+  normalizeAnalysisResult,
+  mapDiaryResponseToMemoirEntry,
+} from '../utils/diaryHelpers.js';
 
 const DEFAULT_BARS = [
   28, 42, 65, 35, 80, 95, 55, 40, 72, 90, 100, 68, 48, 84, 62, 36,
@@ -80,9 +84,15 @@ export function useVoiceRecorder({ onMemoirCompleted }) {
       })}`;
 
       let transcribedText = '';
+      let uploadedAudioUrl = null;
       let analysisData = null;
+      let generatedImageUrl = null;
+      let generatedPalette = null;
+      let generatedCaption = null;
+      let savedDiaryResponse = null;
 
       try {
+        // Step 1: Upload audio & transcribe (Issue #2 & Whisper STT)
         if (audioBlob && audioBlob.size > 0) {
           const formData = new FormData();
           formData.append('audio', audioBlob, 'recording.webm');
@@ -92,54 +102,113 @@ export function useVoiceRecorder({ onMemoirCompleted }) {
             body: formData,
           });
 
-          if (!uploadRes.ok) {
-            throw new Error(`음성 업로드 응답 오류 (${uploadRes.status})`);
+          if (uploadRes.ok) {
+            const uploadJson = await uploadRes.json();
+            transcribedText = uploadJson.text || '';
+            uploadedAudioUrl = uploadJson.audioUrl || null;
           }
+        }
 
-          const uploadJson = await uploadRes.json();
-          transcribedText = uploadJson.text || '';
+        const safeRaw =
+          transcribedText && !transcribedText.startsWith('Transcription failed')
+            ? transcribedText
+            : promptHint
+              ? `${promptHint.replace(/^[^\s]+\s/, '').replace(/"/g, '')} 오늘 하루도 정말 숨 가쁘게 지나갔지만, 조용한 밤공기를 마시며 내 마음을 천천히 돌아보았다.`
+              : '아 오늘 하루는 아침부터 정신이 하나도 없었어. 그래도 저녁에 퇴근하면서 밤공기 마시는데 가을 냄새가 나서 기분이 조금 풀리더라. 오늘 진짜 고생 많았다.';
 
-          if (transcribedText && !transcribedText.startsWith('Transcription failed')) {
-            const analyzeRes = await fetch('/api/diary/analyze', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: transcribedText }),
-            });
-            if (analyzeRes.ok) {
-              analysisData = await analyzeRes.json();
+        // Step 2: Analyze & rewrite (Ollama LLM)
+        try {
+          const analyzeRes = await fetch('/api/diary/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: safeRaw }),
+          });
+          if (analyzeRes.ok) {
+            analysisData = await analyzeRes.json();
+          }
+        } catch {
+          // LLM fallback
+        }
+
+        const normalized = normalizeAnalysisResult(analysisData, safeRaw);
+
+        // Step 3: Generate Illustration & store to MinIO (Issue #3)
+        try {
+          const imageRes = await fetch('/api/diary/image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              text: normalized.refinedText,
+              emotion: normalized.emotion,
+            }),
+          });
+          if (imageRes.ok) {
+            const imageJson = await imageRes.json();
+            generatedImageUrl = imageJson.imageUrl || null;
+            generatedPalette = imageJson.palette || null;
+            generatedCaption = imageJson.caption || null;
+          }
+        } catch {
+          // Image fallback
+        }
+
+        // Step 4: Persist in Database (Issue #1)
+        try {
+          const saveRes = await fetch('/api/diary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: normalized.title,
+              rawText: safeRaw,
+              refinedText: normalized.refinedText,
+              emotion: normalized.emotion,
+              score: normalized.score,
+              audioUrl: uploadedAudioUrl,
+              imageUrl: generatedImageUrl,
+            }),
+          });
+          if (saveRes.ok) {
+            savedDiaryResponse = await saveRes.json();
+          }
+        } catch {
+          // DB save fallback
+        }
+
+        if (savedDiaryResponse) {
+          const entryFromDb = mapDiaryResponseToMemoirEntry(savedDiaryResponse);
+          if (entryFromDb) {
+            setIsProcessing(false);
+            if (onMemoirCompleted) {
+              onMemoirCompleted(entryFromDb);
             }
+            return;
           }
+        }
+
+        // Fallback in-memory entry if backend is partially offline
+        const fallbackEntry = Object.freeze({
+          id: `memoir-${Date.now()}`,
+          dateLabel,
+          shortDate,
+          dayOfMonth,
+          durationLabel,
+          emoji: normalized.emotionIcon,
+          illustrationCaption: generatedCaption || '창가에 스미는 밤공기와 오늘 하루를 보듬는 따뜻한 온기',
+          audioUrl: uploadedAudioUrl || (audioBlob && audioBlob.size > 0 ? URL.createObjectURL(audioBlob) : null),
+          imageUrl: generatedImageUrl || null,
+          palette: generatedPalette || normalized.palette,
+          ...normalized,
+        });
+
+        setIsProcessing(false);
+        if (onMemoirCompleted) {
+          onMemoirCompleted(fallbackEntry);
         }
       } catch {
         setErrorMessage(
-          '로컬 AI 서버(Whisper/Ollama)와 연결되지 않아 서재 미리보기 모드로 에세이를 구성했습니다.'
+          '로컬 AI 서버 연결을 확인하지 못해 서재 미리보기 모드로 에세이를 구성했습니다.'
         );
-      }
-
-      const fallbackRaw =
-        transcribedText && !transcribedText.startsWith('Transcription failed')
-          ? transcribedText
-          : promptHint
-            ? `${promptHint.replace(/^[^\s]+\s/, '').replace(/"/g, '')} 오늘 하루도 정말 숨 가쁘게 지나갔지만, 조용한 밤공기를 마시며 내 마음을 천천히 돌아보았다.`
-            : '아 오늘 하루는 아침부터 정신이 하나도 없었어. 그래도 저녁에 퇴근하면서 밤공기 마시는데 가을 냄새가 나서 기분이 조금 풀리더라. 오늘 진짜 고생 많았다.';
-
-      const normalized = normalizeAnalysisResult(analysisData, fallbackRaw);
-
-      const newEntry = Object.freeze({
-        id: `memoir-${Date.now()}`,
-        dateLabel,
-        shortDate,
-        dayOfMonth,
-        durationLabel,
-        emoji: normalized.emotionIcon,
-        illustrationCaption: '창가에 스미는 밤공기와 오늘 하루를 보듬는 따뜻한 온기',
-        audioUrl: audioBlob && audioBlob.size > 0 ? URL.createObjectURL(audioBlob) : null,
-        ...normalized,
-      });
-
-      setIsProcessing(false);
-      if (onMemoirCompleted) {
-        onMemoirCompleted(newEntry);
+        setIsProcessing(false);
       }
     },
     [onMemoirCompleted]
