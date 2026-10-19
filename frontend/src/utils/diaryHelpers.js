@@ -177,6 +177,43 @@ export function normalizeAnalysisResult(rawAnalysis, fallbackRawText = '') {
   });
 }
 
+export function mapDiaryResponseToMemoirEntry(response) {
+  if (!response || typeof response !== 'object') {
+    return null;
+  }
+  const dateObj = response.createdAt ? new Date(response.createdAt) : new Date();
+  const dayOfMonth = dateObj.getDate();
+  const shortDate = `${dateObj.getMonth() + 1}월 ${dayOfMonth}일`;
+  const dateLabel = `${dateObj.getFullYear()}년 ${dateObj.getMonth() + 1}월 ${dayOfMonth}일 • ${dateObj.toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })}`;
+
+  const normalized = normalizeAnalysisResult(
+    {
+      title: response.title,
+      refinedText: response.refinedText,
+      emotion: response.emotion,
+      score: response.score,
+    },
+    response.rawText
+  );
+
+  return Object.freeze({
+    id: `memoir-db-${response.id || Date.now()}`,
+    dbId: response.id,
+    dateLabel,
+    shortDate,
+    dayOfMonth,
+    durationLabel: '01:24',
+    emoji: normalized.emotionIcon,
+    illustrationCaption: response.title || '오늘의 기억을 담은 감성 일러스트',
+    audioUrl: response.audioUrl || null,
+    imageUrl: response.imageUrl || null,
+    ...normalized,
+  });
+}
+
 export function prependArchiveEntry(existingEntries, newEntry) {
   const safeList = Array.isArray(existingEntries) ? existingEntries : [];
   if (!newEntry || typeof newEntry !== 'object') {

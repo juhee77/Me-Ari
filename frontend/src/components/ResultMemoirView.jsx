@@ -149,74 +149,86 @@ export default function ResultMemoirView({
             </div>
 
             <div className="meari-illust-frame">
-              <svg viewBox="0 0 400 400" className="meari-illust-svg">
-                <defs>
-                  <linearGradient id="nightSky" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={memoir.palette?.[0] || '#131829'} />
-                    <stop offset="55%" stopColor="#252b48" />
-                    <stop offset="100%" stopColor={memoir.palette?.[1] || '#473b54'} />
-                  </linearGradient>
-                  <radialGradient id="moonGlow" cx="0.72" cy="0.24" r="0.35">
-                    <stop offset="0%" stopColor="#f6d592" stopOpacity="0.95" />
-                    <stop offset="35%" stopColor="#e0a96d" stopOpacity="0.35" />
-                    <stop offset="100%" stopColor="#e0a96d" stopOpacity="0" />
-                  </radialGradient>
-                  <linearGradient id="windowLight" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#fbd38d" stopOpacity="0.85" />
-                    <stop offset="100%" stopColor="#dd6b20" stopOpacity="0.45" />
-                  </linearGradient>
-                </defs>
-                <rect width="400" height="400" fill="url(#nightSky)" />
-                <circle cx="288" cy="96" r="120" fill="url(#moonGlow)" />
-                <circle cx="288" cy="96" r="24" fill="#fef3c7" />
-                <circle cx="70" cy="65" r="1.5" fill="#fef3c7" opacity="0.7" />
-                <circle cx="140" cy="48" r="1.2" fill="#fef3c7" opacity="0.5" />
-                <circle cx="195" cy="92" r="1.8" fill="#fef3c7" opacity="0.6" />
-                <circle cx="95" cy="130" r="1.2" fill="#fef3c7" opacity="0.4" />
-                <path
-                  d="M0 290 Q110 245 230 285 T400 275 L400 400 L0 400 Z"
-                  fill="#1e2236"
+              {memoir.imageUrl ? (
+                <img
+                  src={memoir.imageUrl}
+                  alt={memoir.illustrationCaption}
+                  className="meari-illust-svg"
+                  onError={(e) => {
+                    // Gracefully hide broken img and show svg fallback
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
-                <path
-                  d="M0 320 Q160 285 310 315 T400 310 L400 400 L0 400 Z"
-                  fill="#151826"
-                />
-                <rect
-                  x="52"
-                  y="210"
-                  width="84"
-                  height="110"
-                  rx="6"
-                  fill="#10131e"
-                  stroke="#e0a96d"
-                  strokeWidth="2"
-                  strokeOpacity="0.5"
-                />
-                <rect x="60" y="218" width="30" height="44" fill="url(#windowLight)" rx="2" />
-                <rect x="96" y="218" width="30" height="44" fill="url(#windowLight)" rx="2" />
-                <rect x="60" y="268" width="30" height="44" fill="url(#windowLight)" rx="2" />
-                <rect x="96" y="268" width="30" height="44" fill="url(#windowLight)" rx="2" />
-                <path
-                  d="M400 160 Q320 185 265 170 M340 175 Q300 205 275 215"
-                  stroke="#0f121c"
-                  strokeWidth="5"
-                  strokeLinecap="round"
-                  fill="none"
-                />
-                <circle cx="265" cy="170" r="9" fill="#d97706" opacity="0.85" />
-                <circle cx="295" cy="182" r="7" fill="#b45309" opacity="0.8" />
-                <circle cx="242" cy="212" r="5" fill="#f59e0b" opacity="0.75" />
-                <circle cx="205" cy="248" r="4.5" fill="#d97706" opacity="0.7" />
-                <path
-                  d="M168 338 Q172 322 166 312 M180 336 Q184 320 178 310"
-                  stroke="#fde68a"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  fill="none"
-                  opacity="0.55"
-                />
-                <rect x="160" y="342" width="28" height="18" rx="4" fill="#e0a96d" />
-              </svg>
+              ) : (
+                <svg viewBox="0 0 400 400" className="meari-illust-svg">
+                  <defs>
+                    <linearGradient id="nightSky" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={memoir.palette?.[0] || '#131829'} />
+                      <stop offset="55%" stopColor="#252b48" />
+                      <stop offset="100%" stopColor={memoir.palette?.[1] || '#473b54'} />
+                    </linearGradient>
+                    <radialGradient id="moonGlow" cx="0.72" cy="0.24" r="0.35">
+                      <stop offset="0%" stopColor="#f6d592" stopOpacity="0.95" />
+                      <stop offset="35%" stopColor="#e0a96d" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#e0a96d" stopOpacity="0" />
+                    </radialGradient>
+                    <linearGradient id="windowLight" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#fbd38d" stopOpacity="0.85" />
+                      <stop offset="100%" stopColor="#dd6b20" stopOpacity="0.45" />
+                    </linearGradient>
+                  </defs>
+                  <rect width="400" height="400" fill="url(#nightSky)" />
+                  <circle cx="288" cy="96" r="120" fill="url(#moonGlow)" />
+                  <circle cx="288" cy="96" r="24" fill="#fef3c7" />
+                  <circle cx="70" cy="65" r="1.5" fill="#fef3c7" opacity="0.7" />
+                  <circle cx="140" cy="48" r="1.2" fill="#fef3c7" opacity="0.5" />
+                  <circle cx="195" cy="92" r="1.8" fill="#fef3c7" opacity="0.6" />
+                  <circle cx="95" cy="130" r="1.2" fill="#fef3c7" opacity="0.4" />
+                  <path
+                    d="M0 290 Q110 245 230 285 T400 275 L400 400 L0 400 Z"
+                    fill="#1e2236"
+                  />
+                  <path
+                    d="M0 320 Q160 285 310 315 T400 310 L400 400 L0 400 Z"
+                    fill="#151826"
+                  />
+                  <rect
+                    x="52"
+                    y="210"
+                    width="84"
+                    height="110"
+                    rx="6"
+                    fill="#10131e"
+                    stroke="#e0a96d"
+                    strokeWidth="2"
+                    strokeOpacity="0.5"
+                  />
+                  <rect x="60" y="218" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                  <rect x="96" y="218" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                  <rect x="60" y="268" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                  <rect x="96" y="268" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                  <path
+                    d="M400 160 Q320 185 265 170 M340 175 Q300 205 275 215"
+                    stroke="#0f121c"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                  <circle cx="265" cy="170" r="9" fill="#d97706" opacity="0.85" />
+                  <circle cx="295" cy="182" r="7" fill="#b45309" opacity="0.8" />
+                  <circle cx="242" cy="212" r="5" fill="#f59e0b" opacity="0.75" />
+                  <circle cx="205" cy="248" r="4.5" fill="#d97706" opacity="0.7" />
+                  <path
+                    d="M168 338 Q172 322 166 312 M180 336 Q184 320 178 310"
+                    stroke="#fde68a"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    fill="none"
+                    opacity="0.55"
+                  />
+                  <rect x="160" y="342" width="28" height="18" rx="4" fill="#e0a96d" />
+                </svg>
+              )}
 
               <div className="meari-illust-overlay">
                 <p>"{memoir.illustrationCaption}"</p>

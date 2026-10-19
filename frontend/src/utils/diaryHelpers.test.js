@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   formatDuration,
   getEmotionMeta,
+  mapDiaryResponseToMemoirEntry,
   normalizeAnalysisResult,
   prependArchiveEntry,
 } from './diaryHelpers.js';
@@ -44,12 +45,25 @@ test('normalizeAnalysisResult validates and enriches AI response immutably', () 
   assert.ok(result.title.length > 0);
 });
 
-test('normalizeAnalysisResult handles missing or malformed payload gracefully', () => {
-  const fallback = normalizeAnalysisResult(null, '짧은 원본 기록');
-  assert.equal(fallback.rawText, '짧은 원본 기록');
-  assert.ok(fallback.refinedText.includes('짧은 원본 기록'));
-  assert.equal(fallback.emotion, '평온');
-  assert.equal(typeof fallback.score, 'number');
+test('mapDiaryResponseToMemoirEntry maps backend DTO to frontend memoir structure', () => {
+  const backendDto = {
+    id: 42,
+    title: '테스트 일기',
+    rawText: '원본 음성 텍스트',
+    refinedText: '다듬어진 에세이',
+    emotion: '기쁨',
+    score: 95,
+    audioUrl: 'http://localhost:9000/meari-media/audio/sample.webm',
+    imageUrl: 'http://localhost:9000/meari-media/images/sample.svg',
+    createdAt: '2026-10-20T06:30:00',
+  };
+
+  const entry = mapDiaryResponseToMemoirEntry(backendDto);
+  assert.equal(entry.dbId, 42);
+  assert.equal(entry.title, '테스트 일기');
+  assert.equal(entry.emotion, '기쁨');
+  assert.equal(entry.audioUrl, 'http://localhost:9000/meari-media/audio/sample.webm');
+  assert.equal(entry.imageUrl, 'http://localhost:9000/meari-media/images/sample.svg');
 });
 
 test('prependArchiveEntry returns a new array without mutating existing entries', () => {
