@@ -70,8 +70,14 @@ public class DiaryController {
     }
 
     @PostMapping("/image")
-    public ResponseEntity<Map<String, String>> generateImage(@RequestBody Map<String, String> payload) {
-        // TODO: Call Local Stable Diffusion (SDXL Lightning) via Python proxy (to be implemented in Issue #3)
-        return ResponseEntity.ok(Map.of("imageUrl", "http://localhost:9000/generated-images/sample.png"));
+    public ResponseEntity<Map<String, Object>> generateImage(@RequestBody Map<String, String> payload) {
+        String text = payload.get("text");
+        if (text == null || text.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Text is required"));
+        }
+
+        String emotion = payload.getOrDefault("emotion", "평온");
+        Map<String, Object> result = diaryService.generateIllustration(text, emotion);
+        return ResponseEntity.ok(result);
     }
 }

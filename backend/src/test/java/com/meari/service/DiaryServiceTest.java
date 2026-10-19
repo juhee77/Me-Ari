@@ -2,10 +2,12 @@ package com.meari.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.meari.dto.DiaryResponse;
 import com.meari.dto.DiarySaveRequest;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,5 +41,18 @@ class DiaryServiceTest {
         List<DiaryResponse> all = diaryService.getAllDiaries();
         assertEquals(1, all.size());
         assertEquals(saved.id(), all.get(0).id());
+    }
+
+    @Test
+    void generateIllustrationReturnsMinioImageUrlAndPalette() {
+        Map<String, Object> result = diaryService.generateIllustration(
+                "오늘 하루도 수고 많았다.",
+                "평온"
+        );
+
+        assertNotNull(result.get("imageUrl"));
+        assertTrue(result.get("imageUrl").toString().contains("meari-media/images/"));
+        assertNotNull(result.get("palette"));
+        assertNotNull(result.get("caption"));
     }
 }
