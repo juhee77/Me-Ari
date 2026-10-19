@@ -7,6 +7,8 @@ import com.meari.dto.DiaryResponse;
 import com.meari.dto.DiarySaveRequest;
 import com.meari.repository.DiaryRepository;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,12 +27,14 @@ public class DiaryService {
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
     private final DiaryRepository diaryRepository;
+    private final StorageService storageService;
     private final String whisperUrl;
     private final String ollamaUrl;
     private final String ollamaModel;
 
     public DiaryService(
             DiaryRepository diaryRepository,
+            StorageService storageService,
             @Value("${meari.ai.whisper-url:http://localhost:8000}") String whisperUrl,
             @Value("${meari.ai.ollama-url:http://localhost:11434}") String ollamaUrl,
             @Value("${meari.ai.ollama-model:gemma2:2b}") String ollamaModel
@@ -38,6 +42,7 @@ public class DiaryService {
         this.restClient = RestClient.create();
         this.objectMapper = new ObjectMapper();
         this.diaryRepository = diaryRepository;
+        this.storageService = storageService;
         this.whisperUrl = whisperUrl;
         this.ollamaUrl = ollamaUrl;
         this.ollamaModel = ollamaModel;
@@ -126,5 +131,60 @@ public class DiaryService {
                     "score", 0
             );
         }
+    }
+
+    public Map<String, Object> generateIllustration(String text, String emotion) {
+        String safeEmotion = (emotion != null && !emotion.isBlank()) ? emotion : "평온";
+        Map<String, Object> requestBody = Map.of(
+                "text", text,
+                "emotion", safeEmotion
+        );
+
+        String svgContent = null;
+        List<String> palette = List.of("#131829", "#473b54", "#d97706", "#fef3c7");
+        String caption = "고요한 밤의 서재와 따뜻한 온기";
+
+        try {
+            String response = restClient.post()
+                    .uri(whisperUrl + "/api/generate-image")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .retrieve()
+                    .body(String.class);
+
+            JsonNode root = objectMapper.readTree(response);
+            if (root.has("svgContent")) {
+                svgContent = root.path("svgContent").asText();
+            }
+            if (root.has("caption")) {
+                caption = root.path("caption").asText();
+            }
+            if (root.has("palette") && root.path("palette").isArray()) {
+                List<String> palList = new ArrayList<>();
+                root.path("palette").forEach(node -> palList.add(node.asText()));
+                palette = palList;
+            }
+        } catch (Exception e) {
+            svgContent = String.format(
+                    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 400\"><rect width=\"400\" height=\"400\" fill=\"%s\"/><circle cx=\"288\" cy=\"96\" r=\"24\" fill=\"%s\"/><title>%s</title></svg>",
+                    palette.get(0), palette.get(3), caption
+            );
+        }
+
+        if (svgContent == null || svgContent.isBlank()) {
+            svgContent = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 400\"><rect width=\"400\" height=\"400\" fill=\"#131829\"/></svg>";
+        }
+
+        String imageUrl = storageService.uploadImageBytes(
+                svgContent.getBytes(StandardCharsets.UTF_8),
+                "image/svg+xml",
+                ".svg"
+        );
+
+        return Map.of(
+                "imageUrl", imageUrl,
+                "palette", palette,
+                "caption", caption
+        );
     }
 }
