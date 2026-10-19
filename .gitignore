@@ -1,0 +1,25 @@
+# OS & IDE
+.DS_Store
+.idea/
+*.iml
+.vscode/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Python AI Service
+ai-service/venv/
+__pycache__/
+*.py[cod]
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+
+# Java / Gradle Backend
+backend/.gradle/
+backend/build/
+!backend/gradle/wrapper/gradle-wrapper.jar

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Me-Ari (메아리) — UI/UX 비교 및 리디자인 목업</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @font-face {
+      font-family: 'Pretendard Variable';
+      font-weight: 45 920;
+      font-style: normal;
+      font-display: swap;
+      src: local('Pretendard Variable'),
+           local('PretendardVariable'),
+           local('Pretendard'),
+           url('./PretendardVariable.woff2') format('woff2-variations'),
+           url('file:///Users/juhee/font/Pretendard-1/web/variable/woff2/PretendardVariable.woff2') format('woff2-variations'),
+           url('file:///Users/juhee/font/Pretendard-1/public/variable/PretendardVariable.ttf') format('truetype');
+    }
+
+    * {
+      font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      box-sizing: border-box;
+    }
+
+    /* Modern Web Guidance: improve-text-layout-and-legibility */
+    h1, h2, h3, h4, .balance-text {
+      text-wrap: balance;
+    }
+    p, blockquote, li, .pretty-text {
+      text-wrap: pretty;
+    }
+
+    /* Theme Tokens for TO-BE Redesign */
+    .theme-midnight {
+      --m-bg: #0f1117;
+      --m-bg-radial: radial-gradient(circle at 50% 0%, rgba(217, 167, 106, 0.14) 0%, rgba(99, 102, 241, 0.06) 42%, rgba(15, 17, 23, 0) 75%);
+      --m-surface: rgba(25, 28, 38, 0.78);
+      --m-surface-elevated: rgba(34, 38, 52, 0.85);
+      --m-border: rgba(255, 248, 235, 0.09);
+      --m-border-strong: rgba(217, 167, 106, 0.35);
+      --m-text: #f4f1ea;
+      --m-text-secondary: #a8a29e;
+      --m-text-muted: #78716c;
+      --m-accent: #e0a96d;
+      --m-accent-soft: rgba(224, 169, 109, 0.15);
+      --m-accent-glow: rgba(224, 169, 109, 0.35);
+      --m-secondary: #818cf8;
+      --m-paper: rgba(28, 31, 43, 0.9);
+    }
+
+    .theme-pastel {
+      --m-bg: #f7f4ef;
+      --m-bg-radial: radial-gradient(circle at 50% 0%, rgba(212, 163, 115, 0.22) 0%, rgba(181, 168, 213, 0.15) 45%, rgba(247, 244, 239, 0) 75%);
+      --m-surface: rgba(255, 253, 249, 0.84);
+      --m-surface-elevated: rgba(255, 255, 255, 0.95);
+      --m-border: rgba(120, 113, 108, 0.15);
+      --m-border-strong: rgba(180, 130, 85, 0.4);
+      --m-text: #292524;
+      --m-text-secondary: #57534e;
+      --m-text-muted: #8a817c;
+      --m-accent: #b07d4f;
+      --m-accent-soft: rgba(176, 125, 79, 0.12);
+      --m-accent-glow: rgba(176, 125, 79, 0.28);
+      --m-secondary: #6366f1;
+      --m-paper: #fffdf9;
+    }
+
+    /* Ambient Orb Pulse */
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.65; }
+      50% { transform: scale(1.18); opacity: 0.18; }
+      100% { transform: scale(0.95); opacity: 0.65; }
+    }
+    @keyframes pulseRingOuter {
+      0% { transform: scale(1); opacity: 0.35; }
+      50% { transform: scale(1.36); opacity: 0.05; }
+      100% { transform: scale(1); opacity: 0.35; }
+    }
+    .orb-ring-1 {
+      animation: pulseRing 4s ease-in-out infinite;
+    }
+    .orb-ring-2 {
+      animation: pulseRingOuter 4s ease-in-out infinite 0.6s;
+    }
+
+    /* Waveform Bars Animation */
+    @keyframes waveBar {
+      0%, 100% { transform: scaleY(0.22); }
+      50% { transform: scaleY(1); }
+    }
+    .wave-bar {
+      transform-origin: center;
+      animation: waveBar 1.1s ease-in-out infinite;
+    }
+
+    /* Subtle Paper Line Pattern for Essay */
+    .essay-lines {
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 35px,
+        var(--m-border) 35px,
+        var(--m-border) 36px
+      );
+      line-height: 36px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(168, 162, 158, 0.3);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0d12] text-[#f4f1ea] min-h-screen antialiased selection:bg-amber-500/30">
+
+  <!-- TOP DESIGNER CONTROL BAR -->
+  <header class="sticky top-0 z-50 backdrop-blur-xl bg-[#12151e]/90 border-b border-white/10 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+          Pretendard Variable 적용됨
+        </span>
+        <h1 class="text-sm sm:text-base font-semibold tracking-tight text-white">
+          Me-Ari (메아리) UI/UX 디자인 리뷰
+        </h1>
+      </div>
+
+      <!-- Mode Switcher: Split / AS-IS / TO-BE -->
+      <div class="flex items-center gap-1.5 bg-black/40 p-1 rounded-xl border border-white/10">
+        <button onclick="setCompareMode('tobe')" id="btn-mode-tobe" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-amber-500 text-slate-950 shadow-sm">
+          ✨ 20년차 디자이너 개선안 (TO-BE)
+        </button>
+        <button onclick="setCompareMode('split')" id="btn-mode-split" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-300 hover:text-white">
+          ⚖️ 한눈에 비교 (AS-IS vs TO-BE)
+        </button>
+        <button onclick="setCompareMode('asis')" id="btn-mode-asis" class="px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-300 hover:text-white">
+          🛠 현재 구현된 화면 (AS-IS)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto p-4 lg:p-6">
+
+    <!-- DESIGNER RATIONALE BANNER -->
+    <section id="designer-notes" class="mb-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-indigo-500/10 to-transparent border border-amber-500/20 p-4 sm:p-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 text-amber-300 text-xs font-semibold uppercase tracking-wider mb-1">
+            <span>Senior Frontend Designer's Note</span>
+            <span>•</span>
+            <span>Font: /Users/juhee/font/Pretendard-1</span>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-300 leading-relaxed pretty-text">
+            기존 UI는 기능 테스트용 기본 인라인 스타일(원색 초록/빨강 버튼, 회색 박스)로만 구성되어 있어 <strong>'목소리 일기'만의 감성적 몰입감</strong>이 부족했습니다.
+            개선안(TO-BE)은 기획서의 <strong>'깊은 밤의 서재'</strong>와 <strong>'차분한 파스텔 톤'</strong>을 모두 지원하며, <strong>Pretendard 가변 폰트</strong>의 섬세한 웨이트(350~700)와 자간 조절을 활용해 책장 위에 놓인 에세이 같은 경험을 제공합니다.
+          </p>
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
+          <span class="text-xs text-slate-400">서재 무드 변경:</span>
+          <button onclick="setMood('midnight')" id="mood-midnight" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-400/50 bg-amber-500/20 text-amber-200 transition">
+            🌙 깊은 밤의 서재
+          </button>
+          <button onclick="setMood('pastel')" id="mood-pastel" class="px-3 py-1.5 rounded-lg text-xs font-medium border border-white/10 bg-white/5 text-slate-300 hover:text-white transition">
+            🌅 차분한 파스텔
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- LAYOUT GRID (Changes dynamically based on mode) -->
+    <div id="comparison-grid" class="grid grid-cols-1 gap-6">
+
+      <!-- ========================================== -->
+      <!-- 1. AS-IS PANEL (CURRENT IMPLEMENTATION)    -->
+      <!-- ========================================== -->
+      <section id="panel-asis" class="hidden rounded-2xl border border-white/15 bg-white text-black overflow-hidden shadow-xl">
+        <div class="bg-slate-800 text-white px-4 py-2.5 flex items-center justify-between border-b border-slate-700">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+            <span class="text-xs font-semibold tracking-wide">AS-IS : 현재 만들어진 UI (App.jsx + AudioRecorder.jsx)</span>
+          </div>
+          <span class="text-xs text-slate-400">Inline CSS • 기본 시스템 스타일</span>
+        </div>
+
+        <!-- Exact Replica of Current Frontend Code -->
+        <div class="p-6 sm:p-10 bg-white text-black min-h-[540px]">
+          <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <h1 style="font-size: 2em; font-weight: bold; margin-bottom: 16px;">Me-Ari (Voice Memoir)</h1>
+            <div style="padding: 20px;">
+              <h2 style="font-size: 1.5em; font-weight: bold; margin-bottom: 14px;">🎙 Voice Memoir Recorder</h2>
+              <div>
+                <button id="asis-record-btn" onclick="toggleAsIsRecording()" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">
+                  Start Recording
+                </button>
+              </div>
+
+              <div style="margin-top: 20px;">
+                <h3 style="font-size: 1.17em; font-weight: bold; margin-bottom: 8px;">Transcription:</h3>
+                <p id="asis-stt-box" style="min-height: 50px; padding: 10px; background-color: #f0f0f0; border-radius: 5px; color: #333;">
+                  음성 인식이 완료되면 여기에 원본 텍스트가 표시됩니다. (예: 아 오늘 진짜 프로젝트 발표 준비하느라 너무 힘들었는데 그래도 무사히 끝내서 다행이다...)
+                </p>
+              </div>
+
+              <div style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 8px; text-align: center;">
+                <h3 style="font-size: 1.17em; font-weight: bold; margin-bottom: 10px;">✨ AI Refined Diary:</h3>
+                <p style="margin-bottom: 10px; line-height: 1.5;">
+                  긴장 속에 준비했던 프로젝트 발표를 마침내 무사히 끝냈다. 고된 하루였지만 마음 한편에 잔잔한 안도감이 차오른다.
+                </p>
+                <p><strong>Emotion:</strong> 평온 (Score: 85)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pain points callout -->
+          <div class="mt-8 pt-6 border-t border-slate-200 text-left max-w-2xl mx-auto">
+            <p class="text-xs font-bold text-rose-600 uppercase tracking-wider mb-2">🔍 현재 UI의 아쉬운 점 (개선 포인트)</p>
+            <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
+              <li><strong>감성 무드 부재:</strong> 투박한 흰 배경과 원색 버튼(<code>#4CAF50</code>)으로 인해 하루를 진솔하게 돌아보는 '밤의 서재' 느낌이 전혀 나지 않습니다.</li>
+              <li><strong>녹음 인터랙션 피드백 부족:</strong> 녹음 중일 때 목소리가 잘 들어가고 있는지 실시간 파형(Visualizer)이나 경과 시간을 알 수 없습니다.</li>
+              <li><strong>결과 화면의 단조로움:</strong> 기획서에 정의된 <strong>좌측 에세이 + 우측 AI 일러스트 + 하단 감정 스탯 리포트</strong> 레이아웃과 <strong>타임라인(캘린더)</strong>이 빠져 있습니다.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 2. TO-BE PANEL (20-YEAR DESIGNER REDESIGN) -->
+      <!-- ========================================== -->
+      <section id="panel-tobe" class="theme-midnight rounded-3xl border border-[var(--m-border)] overflow-hidden shadow-2xl transition-colors duration-500" style="background-color: var(--m-bg); background-image: var(--m-bg-radial); color: var(--m-text);">
+
+        <!-- App Shell Header -->
+        <div class="border-b border-[var(--m-border)] px-6 py-4 flex flex-wrap items-center justify-between gap-4 backdrop-blur-md" style="background-color: var(--m-surface);">
+          <!-- Brand Logo -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center border border-[var(--m-border-strong)] shadow-inner" style="background: var(--m-accent-soft);">
+              <svg class="w-5 h-5" style="color: var(--m-accent);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-base tracking-tight">메아리</span>
+                <span class="text-xs font-light tracking-widest uppercase opacity-60">Me-Ari</span>
+              </div>
+              <p class="text-xs" style="color: var(--m-text-secondary);">나의 페르소나, 보이스 메모아</p>
+            </div>
+          </div>
+
+          <!-- Interactive Screen Step Switcher (To test all 4 views) -->
+          <nav class="flex items-center gap-1 p-1 rounded-2xl border border-[var(--m-border)]" style="background-color: var(--m-bg);">
+            <button onclick="switchScreen('main')" id="tab-main" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all" style="background-color: var(--m-accent); color: #121316;">
+              ① 메인 (녹음 대기)
+            </button>
+            <button onclick="switchScreen('recording')" id="tab-recording" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all" style="color: var(--m-text-secondary);">
+              ② 녹음 중 (파형)
+            </button>
+            <button onclick="switchScreen('result')" id="tab-result" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all" style="color: var(--m-text-secondary);">
+              ③ 결과 (에세이 & 그림)
+            </button>
+            <button onclick="switchScreen('timeline')" id="tab-timeline" class="px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all" style="color: var(--m-text-secondary);">
+              ④ 서재 타임라인
+            </button>
+          </nav>
+
+          <!-- Date & Profile Pill -->
+          <div class="hidden xl:flex items-center gap-3 text-xs" style="color: var(--m-text-secondary);">
+            <span>2026. 10. 17 (토)</span>
+            <span class="w-1 h-1 rounded-full" style="background-color: var(--m-accent);"></span>
+            <span>주희님의 서재</span>
+          </div>
+        </div>
+
+        <!-- ================================================== -->
+        <!-- SCREEN 1: MAIN PAGE (깊은 밤의 서재 - 녹음 대기)        -->
+        <!-- ================================================== -->
+        <div id="screen-main" class="px-6 py-14 sm:py-20 max-w-3xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium border border-[var(--m-border)] mb-6" style="background-color: var(--m-surface); color: var(--m-accent);">
+            <span>🕯️ Deep Night Study</span>
+            <span>•</span>
+            <span>밤 10시 42분의 기록</span>
+          </div>
+
+          <h2 class="text-2xl sm:text-4xl font-semibold tracking-tight mb-3 balance-text" style="letter-spacing: -0.025em;">
+            오늘 하루는 어땠나요?
+          </h2>
+          <p class="text-sm sm:text-base font-normal mb-12 pretty-text" style="color: var(--m-text-secondary);">
+            쓰지 말고 편하게 말해보세요. 두서없는 혼잣말도 괜찮아요.<br class="hidden sm:inline" />
+            AI가 당신의 목소리를 한 편의 에세이와 한 장의 그림으로 남겨드립니다.
+          </p>
+
+          <!-- Central Microphone Orb with Breathing Ripples -->
+          <div class="relative w-44 h-44 mx-auto flex items-center justify-center my-8">
+            <div class="orb-ring-2 absolute inset-0 rounded-full border" style="border-color: var(--m-border-strong); background: var(--m-accent-soft);"></div>
+            <div class="orb-ring-1 absolute inset-4 rounded-full border" style="border-color: var(--m-border-strong); background: var(--m-accent-soft);"></div>
+            
+            <button onclick="switchScreen('recording')" class="relative z-10 w-28 h-28 rounded-full flex flex-col items-center justify-center gap-1.5 shadow-2xl transition-transform duration-300 hover:scale-105 active:scale-95 group border border-white/20" style="background: linear-gradient(145deg, var(--m-accent), #c48347); box-shadow: 0 18px 48px -10px var(--m-accent-glow);">
+              <svg class="w-9 h-9 text-slate-950 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              </svg>
+              <span class="text-xs font-bold text-slate-950 tracking-tight">이야기 시작</span>
+            </button>
+          </div>
+
+          <p class="text-xs mt-6 mb-10" style="color: var(--m-text-muted);">
+            마이크 아이콘을 누르면 녹음이 시작됩니다 (클릭하여 녹음 화면 체험)
+          </p>
+
+          <!-- Conversation Starter Prompts -->
+          <div class="max-w-xl mx-auto pt-8 border-t border-[var(--m-border)]">
+            <p class="text-xs font-medium mb-3" style="color: var(--m-text-muted);">어떤 말부터 꺼낼지 고민된다면</p>
+            <div class="flex flex-wrap justify-center gap-2">
+              <button onclick="switchScreen('recording')" class="px-3.5 py-2 rounded-xl text-xs border border-[var(--m-border)] transition hover:border-[var(--m-border-strong)]" style="background-color: var(--m-surface); color: var(--m-text-secondary);">
+                💭 "오늘 가장 기억에 남는 장면은..."
+              </button>
+              <button onclick="switchScreen('recording')" class="px-3.5 py-2 rounded-xl text-xs border border-[var(--m-border)] transition hover:border-[var(--m-border-strong)]" style="background-color: var(--m-surface); color: var(--m-text-secondary);">
+                🍵 "조금 지쳤지만 나에게 해주고 싶은 말"
+              </button>
+              <button onclick="switchScreen('recording')" class="px-3.5 py-2 rounded-xl text-xs border border-[var(--m-border)] transition hover:border-[var(--m-border-strong)]" style="background-color: var(--m-surface); color: var(--m-text-secondary);">
+                ✨ "나를 미소 짓게 한 사소한 순간"
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================== -->
+        <!-- SCREEN 2: RECORDING VIEW (실시간 음성 파형)          -->
+        <!-- ================================================== -->
+        <div id="screen-recording" class="hidden px-6 py-12 sm:py-16 max-w-3xl mx-auto text-center">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30 mb-4">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+            <span>귀 기울여 듣고 있어요</span>
+          </div>
+
+          <!-- Timer -->
+          <div class="text-4xl sm:text-5xl font-light tracking-wider tabular-nums mb-2" id="rec-timer">
+            01:24
+          </div>
+          <p class="text-xs mb-10" style="color: var(--m-text-secondary);">
+            천천히 생각나는 대로 말씀해 주세요. 침묵도 자연스럽게 다듬어집니다.
+          </p>
+
+          <!-- Live Dynamic Waveform Visualizer Box -->
+          <div class="rounded-3xl border border-[var(--m-border-strong)] p-6 sm:p-8 mb-8 backdrop-blur-md shadow-inner" style="background-color: var(--m-surface);">
+            <div id="waveform-bars" class="h-28 flex items-center justify-center gap-1.5 px-2">
+              <!-- Populated dynamically via JS for realistic organic bars -->
+            </div>
+
+            <!-- Live Whisper STT Preview Caption -->
+            <div class="mt-6 pt-5 border-t border-[var(--m-border)] text-left">
+              <div class="flex items-center justify-between text-xs mb-2" style="color: var(--m-text-muted);">
+                <span>실시간 음성 메모 (Local Whisper-tiny)</span>
+                <span>한국어 인식 중...</span>
+              </div>
+              <p class="text-sm leading-relaxed italic pretty-text" style="color: var(--m-text);">
+                "아 오늘 하루는 진짜 아침부터 정신이 하나도 없었어. 그래도 저녁에 퇴근하면서 밤공기 마시는데 가을 냄새가 나서 기분이 조금 풀리더라..."
+                <span class="inline-block w-1.5 h-4 align-middle ml-1 animate-pulse" style="background-color: var(--m-accent);"></span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Recording Controls (Pause & Complete) -->
+          <div class="flex items-center justify-center gap-4">
+            <button onclick="togglePauseDemo()" id="btn-pause-demo" class="px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-medium border border-[var(--m-border)] flex items-center gap-2 transition hover:opacity-90" style="background-color: var(--m-surface-elevated); color: var(--m-text);">
+              <span>⏸</span>
+              <span id="pause-label">잠시 멈춤</span>
+            </button>
+
+            <button onclick="switchScreen('result')" class="px-8 py-3.5 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-lg transition transform hover:scale-[1.02]" style="background: linear-gradient(135deg, var(--m-accent), #c48347); color: #121316; box-shadow: 0 10px 30px -5px var(--m-accent-glow);">
+              <span>✨ 이야기 마치기 (일기 완성)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ================================================== -->
+        <!-- SCREEN 3: RESULT VIEW (에세이 + 일러스트 + 감정 리포트) -->
+        <!-- ================================================== -->
+        <div id="screen-result" class="hidden p-6 sm:p-8 max-w-6xl mx-auto">
+          <!-- Top Status Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <div>
+              <span class="text-xs font-medium" style="color: var(--m-accent);">2026년 10월 17일 토요일 • 밤 10:45</span>
+              <h2 class="text-xl sm:text-2xl font-bold tracking-tight mt-0.5 balance-text">
+                가을밤, 창가에 내려앉은 긴 하루의 끝
+              </h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="switchScreen('main')" class="px-3.5 py-2 rounded-xl text-xs font-medium border border-[var(--m-border)] transition" style="background-color: var(--m-surface); color: var(--m-text-secondary);">
+                🎙 다시 녹음하기
+              </button>
+              <button onclick="switchScreen('timeline')" class="px-4 py-2 rounded-xl text-xs font-semibold transition" style="background-color: var(--m-accent); color: #121316;">
+                📚 서재에 보관하기
+              </button>
+            </div>
+          </div>
+
+          <!-- Split Layout: Left Essay / Right AI Illustration -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+
+            <!-- LEFT: AI Refined Diary (7 cols) -->
+            <div class="lg:col-span-7 rounded-3xl border border-[var(--m-border)] p-6 sm:p-8 flex flex-col justify-between shadow-lg" style="background-color: var(--m-paper);">
+              <div>
+                <!-- Toggle between Refined Essay & Original STT -->
+                <div class="flex items-center justify-between gap-2 pb-4 mb-6 border-b border-[var(--m-border)]">
+                  <div class="flex items-center gap-1.5 p-1 rounded-xl border border-[var(--m-border)]" style="background-color: var(--m-bg);">
+                    <button onclick="toggleTextMode('refined')" id="btn-text-refined" class="px-3 py-1 rounded-lg text-xs font-semibold transition" style="background-color: var(--m-accent); color: #121316;">
+                      ✨ AI 다듬은 에세이
+                    </button>
+                    <button onclick="toggleTextMode('raw')" id="btn-text-raw" class="px-3 py-1 rounded-lg text-xs font-medium transition" style="color: var(--m-text-secondary);">
+                      🎙 원본 음성 텍스트
+                    </button>
+                  </div>
+                  <span class="text-xs" style="color: var(--m-text-muted);">Gemma 2 (2B) 교정 완료</span>
+                </div>
+
+                <!-- Essay Body -->
+                <div id="diary-content-refined" class="essay-lines text-sm sm:text-base font-normal tracking-normal pretty-text" style="color: var(--m-text); font-weight: 380;">
+                  <p class="mb-6">
+                    아침부터 쉴 새 없이 몰아치던 일정 속에서 유난히 숨 가쁘게 달려온 하루였다. 끝없이 이어지는 할 일들에 마음이 조금씩 무거워졌지만, 묵묵히 오늘의 몫을 해낸 나에게 작은 위로를 건네고 싶다.
+                  </p>
+                  <p>
+                    집으로 돌아오는 길, 뺨에 스치는 선선한 가을 밤공기가 복잡했던 머릿속을 차분히 식혀주었다. 고단함 끝에 찾아온 이 고요한 밤의 평화가 내일의 나를 다시 걷게 할 따뜻한 힘이 되어줄 것이다.
+                  </p>
+                </div>
+
+                <!-- Raw STT Body (Hidden by default) -->
+                <div id="diary-content-raw" class="hidden text-sm leading-relaxed p-4 rounded-2xl border border-[var(--m-border)] pretty-text" style="background-color: var(--m-surface); color: var(--m-text-secondary);">
+                  <p class="text-xs font-semibold mb-2" style="color: var(--m-accent);">원본 음성 인식 기록 (Whisper STT):</p>
+                  "아 오늘 하루는 진짜 아침부터 정신이 하나도 없었어. 할 일도 너무 많고 피곤했는데 그래도 어찌저찌 다 끝냈다. 저녁에 퇴근하면서 집 오는 길에 밤공기 마시는데 가을 냄새가 나서 기분이 조금 풀리더라. 오늘 진짜 고생 많았다."
+                </div>
+              </div>
+
+              <!-- Bottom Voice Replay Mini Bar -->
+              <div class="mt-8 pt-4 border-t border-[var(--m-border)] flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <button onclick="toggleAudioPlay()" id="btn-audio-play" class="w-9 h-9 rounded-full flex items-center justify-center transition" style="background-color: var(--m-accent-soft); color: var(--m-accent);">
+                    ▶
+                  </button>
+                  <div>
+                    <p class="text-xs font-medium">오늘의 목소리 원본 다시 듣기</p>
+                    <p class="text-xs" style="color: var(--m-text-muted);">01:24 • MinIO Local Storage 보관됨</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="px-2.5 py-1 rounded-full text-xs border border-[var(--m-border)]" style="color: var(--m-text-secondary);">#가을밤</span>
+                  <span class="px-2.5 py-1 rounded-full text-xs border border-[var(--m-border)]" style="color: var(--m-text-secondary);">#퇴근길</span>
+                  <span class="px-2.5 py-1 rounded-full text-xs border border-[var(--m-border)]" style="color: var(--m-text-secondary);">#안도감</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT: AI Generated Illustration Card (5 cols) -->
+            <div class="lg:col-span-5 rounded-3xl border border-[var(--m-border)] p-5 flex flex-col justify-between shadow-lg" style="background-color: var(--m-surface);">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <span class="text-xs font-semibold flex items-center gap-1.5" style="color: var(--m-accent);">
+                    <span>🎨 오늘의 기억 일러스트</span>
+                  </span>
+                  <span class="text-xs" style="color: var(--m-text-muted);">SDXL Lightning</span>
+                </div>
+
+                <!-- Artistic SVG/Canvas Illustration representing 'Autumn Night Walk & Study' -->
+                <div class="relative rounded-2xl overflow-hidden aspect-square border border-white/10 shadow-inner group">
+                  <svg viewBox="0 0 400 400" class="w-full h-full object-cover">
+                    <defs>
+                      <linearGradient id="nightSky" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#131829" />
+                        <stop offset="55%" stop-color="#252b48" />
+                        <stop offset="100%" stop-color="#473b54" />
+                      </linearGradient>
+                      <radialGradient id="moonGlow" cx="0.72" cy="0.24" r="0.35">
+                        <stop offset="0%" stop-color="#f6d592" stop-opacity="0.95" />
+                        <stop offset="35%" stop-color="#e0a96d" stop-opacity="0.35" />
+                        <stop offset="100%" stop-color="#e0a96d" stop-opacity="0" />
+                      </radialGradient>
+                      <linearGradient id="windowLight" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#fbd38d" stop-opacity="0.85" />
+                        <stop offset="100%" stop-color="#dd6b20" stop-opacity="0.45" />
+                      </linearGradient>
+                    </defs>
+                    <!-- Sky -->
+                    <rect width="400" height="400" fill="url(#nightSky)" />
+                    <!-- Moon & Glow -->
+                    <circle cx="288" cy="96" r="120" fill="url(#moonGlow)" />
+                    <circle cx="288" cy="96" r="24" fill="#fef3c7" />
+                    <!-- Stars -->
+                    <circle cx="70" cy="65" r="1.5" fill="#fef3c7" opacity="0.7" />
+                    <circle cx="140" cy="48" r="1.2" fill="#fef3c7" opacity="0.5" />
+                    <circle cx="195" cy="92" r="1.8" fill="#fef3c7" opacity="0.6" />
+                    <circle cx="95" cy="130" r="1.2" fill="#fef3c7" opacity="0.4" />
+                    <!-- Distant Hills -->
+                    <path d="M0 290 Q110 245 230 285 T400 275 L400 400 L0 400 Z" fill="#1e2236" />
+                    <path d="M0 320 Q160 285 310 315 T400 310 L400 400 L0 400 Z" fill="#151826" />
+                    <!-- Warm Study Window Silhouette & Lamp -->
+                    <rect x="52" y="210" width="84" height="110" rx="6" fill="#10131e" stroke="#e0a96d" stroke-width="2" stroke-opacity="0.5" />
+                    <rect x="60" y="218" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                    <rect x="96" y="218" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                    <rect x="60" y="268" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                    <rect x="96" y="268" width="30" height="44" fill="url(#windowLight)" rx="2" />
+                    <!-- Autumn Tree Branch & Falling Leaves -->
+                    <path d="M400 160 Q320 185 265 170 M340 175 Q300 205 275 215" stroke="#0f121c" stroke-width="5" stroke-linecap="round" fill="none" />
+                    <circle cx="265" cy="170" r="9" fill="#d97706" opacity="0.85" />
+                    <circle cx="295" cy="182" r="7" fill="#b45309" opacity="0.8" />
+                    <circle cx="242" cy="212" r="5" fill="#f59e0b" opacity="0.75" />
+                    <circle cx="205" cy="248" r="4.5" fill="#d97706" opacity="0.7" />
+                    <!-- Tea cup on windowsill -->
+                    <path d="M168 338 Q172 322 166 312 M180 336 Q184 320 178 310" stroke="#fde68a" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.55" />
+                    <rect x="160" y="342" width="28" height="18" rx="4" fill="#e0a96d" />
+                  </svg>
+
+                  <!-- Overlay Caption -->
+                  <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white">
+                    <p class="text-xs opacity-90">
+                      "창가에 스미는 가을 밤공기와 따뜻한 차 한 잔의 온기"
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mood Color Palette Extracted -->
+              <div class="mt-4 pt-3 border-t border-[var(--m-border)] flex items-center justify-between">
+                <span class="text-xs" style="color: var(--m-text-muted);">오늘의 감성 컬러칩</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="w-4 h-4 rounded-full border border-white/20" style="background: #131829;" title="Midnight Navy"></span>
+                  <span class="w-4 h-4 rounded-full border border-white/20" style="background: #473b54;" title="Twilight Mauve"></span>
+                  <span class="w-4 h-4 rounded-full border border-white/20" style="background: #d97706;" title="Autumn Amber"></span>
+                  <span class="w-4 h-4 rounded-full border border-white/20" style="background: #fef3c7;" title="Moonlight Cream"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM: EMOTION ANALYSIS REPORT (감정 분석 리포트) -->
+          <div class="rounded-3xl border border-[var(--m-border-strong)] p-6 backdrop-blur-md" style="background-color: var(--m-surface);">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-2" style="background-color: var(--m-accent-soft); color: var(--m-accent);">
+                  <span>📊 AI 감정 및 목소리 톤 리포트</span>
+                </div>
+                <h3 class="text-base sm:text-lg font-semibold mb-2 balance-text">
+                  "오늘은 조금 지친 하루였네요. 65%의 피로도가 느껴지지만, 끝자락엔 따뜻한 안도감이 담겨 있어요."
+                </h3>
+                <p class="text-xs leading-relaxed pretty-text" style="color: var(--m-text-secondary);">
+                  녹음 초반에는 빠른 발화 속도와 낮은 톤에서 업무 피로도가 감지되었으나, '가을 밤공기'를 언급할 때 목소리 톤이 한결 부드러워지며 평온함(82%)이 크게 상승했습니다.
+                </p>
+              </div>
+
+              <!-- Emotion Stat Bars -->
+              <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-4 rounded-2xl border border-[var(--m-border)]" style="background-color: var(--m-bg);">
+                  <div class="flex items-center justify-between text-xs mb-2">
+                    <span class="font-medium">🌿 평온 & 안도감</span>
+                    <span class="font-bold" style="color: var(--m-accent);">82%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div class="h-full rounded-full" style="width: 82%; background-color: var(--m-accent);"></div>
+                  </div>
+                  <p class="text-xs mt-2" style="color: var(--m-text-muted);">하루를 무사히 마친 성취감</p>
+                </div>
+
+                <div class="p-4 rounded-2xl border border-[var(--m-border)]" style="background-color: var(--m-bg);">
+                  <div class="flex items-center justify-between text-xs mb-2">
+                    <span class="font-medium">🌙 피로도</span>
+                    <span class="font-bold text-indigo-400">65%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div class="h-full rounded-full bg-indigo-400" style="width: 65%;"></div>
+                  </div>
+                  <p class="text-xs mt-2" style="color: var(--m-text-muted);">충분한 수면과 휴식이 필요해요</p>
+                </div>
+
+                <div class="p-4 rounded-2xl border border-[var(--m-border)]" style="background-color: var(--m-bg);">
+                  <div class="flex items-center justify-between text-xs mb-2">
+                    <span class="font-medium">🍂 감성 몰입도</span>
+                    <span class="font-bold text-emerald-400">78%</span>
+                  </div>
+                  <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div class="h-full rounded-full bg-emerald-400" style="width: 78%;"></div>
+                  </div>
+                  <p class="text-xs mt-2" style="color: var(--m-text-muted);">계절과 일상에 대한 섬세한 감각</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================================================== -->
+        <!-- SCREEN 4: TIMELINE / CALENDAR VIEW (서재 타임라인)    -->
+        <!-- ================================================== -->
+        <div id="screen-timeline" class="hidden p-6 sm:p-8 max-w-6xl mx-auto">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <span class="text-xs font-medium" style="color: var(--m-accent);">Memory Archive</span>
+              <h2 class="text-xl sm:text-2xl font-bold tracking-tight">2026년 10월의 목소리 서재</h2>
+            </div>
+            <div class="flex items-center gap-3 text-xs" style="color: var(--m-text-secondary);">
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>기쁨/설렘</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>평온/안도</span>
+              <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>피로/우울</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Mini Mood Calendar (5 cols) -->
+            <div class="lg:col-span-5 rounded-3xl border border-[var(--m-border)] p-6" style="background-color: var(--m-surface);">
+              <div class="flex items-center justify-between mb-4">
+                <span class="text-sm font-semibold">10월 감정 캘린더</span>
+                <span class="text-xs" style="color: var(--m-text-muted);">총 12편의 목소리</span>
+              </div>
+              <div class="grid grid-cols-7 gap-2 text-center text-xs mb-2" style="color: var(--m-text-muted);">
+                <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+              </div>
+              <div class="grid grid-cols-7 gap-2 text-center text-xs">
+                <span></span><span></span><span></span><span></span>
+                <div class="p-2 rounded-xl opacity-50">1</div>
+                <div class="p-2 rounded-xl border border-amber-400/40 bg-amber-400/10 font-semibold">2</div>
+                <div class="p-2 rounded-xl border border-emerald-400/40 bg-emerald-400/10 font-semibold">3</div>
+                <div class="p-2 rounded-xl opacity-50">4</div>
+                <div class="p-2 rounded-xl opacity-50">5</div>
+                <div class="p-2 rounded-xl border border-indigo-400/40 bg-indigo-400/10 font-semibold">6</div>
+                <div class="p-2 rounded-xl opacity-50">7</div>
+                <div class="p-2 rounded-xl border border-emerald-400/40 bg-emerald-400/10 font-semibold">8</div>
+                <div class="p-2 rounded-xl opacity-50">9</div>
+                <div class="p-2 rounded-xl border border-amber-400/40 bg-amber-400/10 font-semibold">10</div>
+                <div class="p-2 rounded-xl opacity-50">11</div>
+                <div class="p-2 rounded-xl border border-indigo-400/40 bg-indigo-400/10 font-semibold">12</div>
+                <div class="p-2 rounded-xl opacity-50">13</div>
+                <div class="p-2 rounded-xl border border-emerald-400/40 bg-emerald-400/10 font-semibold">14</div>
+                <div class="p-2 rounded-xl border border-amber-400/40 bg-amber-400/10 font-semibold">15</div>
+                <div class="p-2 rounded-xl opacity-50">16</div>
+                <button onclick="switchScreen('result')" class="p-2 rounded-xl font-bold ring-2 ring-amber-400 shadow" style="background-color: var(--m-accent); color: #121316;">17</button>
+              </div>
+              <p class="text-xs mt-5 pt-4 border-t border-[var(--m-border)]" style="color: var(--m-text-secondary);">
+                💡 날짜를 클릭하면 그날의 목소리와 AI 에세이, 일러스트를 다시 펼쳐볼 수 있습니다.
+              </p>
+            </div>
+
+            <!-- Recent Voice Memoir Cards (7 cols) -->
+            <div class="lg:col-span-7 space-y-4">
+              <div onclick="switchScreen('result')" class="cursor-pointer rounded-3xl border border-[var(--m-border-strong)] p-5 transition hover:translate-x-1 flex items-start justify-between gap-4" style="background-color: var(--m-surface-elevated);">
+                <div>
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300">🌿 평온 82%</span>
+                    <span class="text-xs" style="color: var(--m-text-muted);">10월 17일 (토) • 01:24</span>
+                  </div>
+                  <h3 class="text-base font-semibold mb-1">가을밤, 창가에 내려앉은 긴 하루의 끝</h3>
+                  <p class="text-xs line-clamp-2 pretty-text" style="color: var(--m-text-secondary);">
+                    집으로 돌아오는 길, 뺨에 스치는 선선한 가을 밤공기가 복잡했던 머릿속을 차분히 식혀주었다...
+                  </p>
+                </div>
+                <div class="w-16 h-16 rounded-2xl shrink-0 bg-gradient-to-br from-indigo-900 via-slate-800 to-amber-700 border border-white/15 flex items-center justify-center text-lg">
+                  🌙
+                </div>
+              </div>
+
+              <div class="rounded-3xl border border-[var(--m-border)] p-5 flex items-start justify-between gap-4" style="background-color: var(--m-surface);">
+                <div>
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300">✨ 설렘 91%</span>
+                    <span class="text-xs" style="color: var(--m-text-muted);">10월 15일 (목) • 02:05</span>
+                  </div>
+                  <h3 class="text-base font-semibold mb-1">오래 준비하던 사이드 프로젝트의 첫 걸음</h3>
+                  <p class="text-xs line-clamp-2 pretty-text" style="color: var(--m-text-secondary);">
+                    드디어 로컬 AI 모델과 스프링 부트 서버를 연결하는 구조를 잡았다. 새로운 기술을 내 손으로 빚어내는 설렘이 기분 좋게 남는다.
+                  </p>
+                </div>
+                <div class="w-16 h-16 rounded-2xl shrink-0 bg-gradient-to-br from-amber-600/60 via-rose-500/40 to-indigo-900 border border-white/15 flex items-center justify-center text-lg">
+                  🕯️
+                </div>
+              </div>
+
+              <div class="rounded-3xl border border-[var(--m-border)] p-5 flex items-start justify-between gap-4" style="background-color: var(--m-surface);">
+                <div>
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300">🌧 피로 74%</span>
+                    <span class="text-xs" style="color: var(--m-text-muted);">10월 12일 (월) • 00:58</span>
+                  </div>
+                  <h3 class="text-base font-semibold mb-1">비 오는 월요일, 따뜻한 커피 한 잔의 위로</h3>
+                  <p class="text-xs line-clamp-2 pretty-text" style="color: var(--m-text-secondary);">
+                    유독 길게 느껴졌던 오후였지만 창밖의 빗소리를 들으며 마신 라떼 한 잔이 작은 쉼표가 되어주었다.
+                  </p>
+                </div>
+                <div class="w-16 h-16 rounded-2xl shrink-0 bg-gradient-to-br from-slate-800 via-indigo-950 to-slate-700 border border-white/15 flex items-center justify-center text-lg">
+                  ☕
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // Generate organic waveform bars for Recording screen
+    const waveformContainer = document.getElementById('waveform-bars');
+    const heights = [28, 42, 65, 35, 80, 95, 55, 40, 72, 90, 100, 68, 48, 84, 62, 36, 78, 92, 60, 44, 88, 70, 50, 96, 64, 38, 74, 52, 82, 45, 30, 58];
+    heights.forEach((h, idx) => {
+      const bar = document.createElement('div');
+      bar.className = 'wave-bar w-1.5 sm:w-2 rounded-full transition-all';
+      bar.style.height = `${h}%`;
+      bar.style.backgroundColor = idx % 3 === 0 ? 'var(--m-accent)' : 'var(--m-secondary)';
+      bar.style.animationDelay = `${(idx * 0.07).toFixed(2)}s`;
+      waveformContainer.appendChild(bar);
+    });
+
+    // Compare Mode Switcher (TO-BE / SPLIT / AS-IS)
+    function setCompareMode(mode) {
+      const grid = document.getElementById('comparison-grid');
+      const asis = document.getElementById('panel-asis');
+      const tobe = document.getElementById('panel-tobe');
+      const btnTobe = document.getElementById('btn-mode-tobe');
+      const btnSplit = document.getElementById('btn-mode-split');
+      const btnAsis = document.getElementById('btn-mode-asis');
+
+      [btnTobe, btnSplit, btnAsis].forEach(b => {
+        b.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all text-slate-300 hover:text-white';
+      });
+
+      if (mode === 'tobe') {
+        grid.className = 'grid grid-cols-1 gap-6';
+        asis.classList.add('hidden');
+        tobe.classList.remove('hidden');
+        btnTobe.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-amber-500 text-slate-950 shadow-sm';
+      } else if (mode === 'asis') {
+        grid.className = 'grid grid-cols-1 gap-6';
+        asis.classList.remove('hidden');
+        tobe.classList.add('hidden');
+        btnAsis.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-amber-500 text-slate-950 shadow-sm';
+      } else if (mode === 'split') {
+        grid.className = 'grid grid-cols-1 xl:grid-cols-2 gap-6 items-start';
+        asis.classList.remove('hidden');
+        tobe.classList.remove('hidden');
+        btnSplit.className = 'px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-amber-500 text-slate-950 shadow-sm';
+      }
+    }
+
+    // Screen Step Switcher inside TO-BE
+    function switchScreen(screen) {
+      const screens = ['main', 'recording', 'result', 'timeline'];
+      screens.forEach(s => {
+        const el = document.getElementById(`screen-${s}`);
+        const tab = document.getElementById(`tab-${s}`);
+        if (s === screen) {
+          el.classList.remove('hidden');
+          tab.style.backgroundColor = 'var(--m-accent)';
+          tab.style.color = '#121316';
+        } else {
+          el.classList.add('hidden');
+          tab.style.backgroundColor = 'transparent';
+          tab.style.color = 'var(--m-text-secondary)';
+        }
+      });
+    }
+
+    // Theme Mood Switcher (Midnight Study vs Warm Pastel)
+    function setMood(mood) {
+      const tobe = document.getElementById('panel-tobe');
+      const btnMidnight = document.getElementById('mood-midnight');
+      const btnPastel = document.getElementById('mood-pastel');
+
+      if (mood === 'midnight') {
+        tobe.classList.remove('theme-pastel');
+        tobe.classList.add('theme-midnight');
+        btnMidnight.className = 'px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-400/50 bg-amber-500/20 text-amber-200 transition';
+        btnPastel.className = 'px-3 py-1.5 rounded-lg text-xs font-medium border border-white/10 bg-white/5 text-slate-300 hover:text-white transition';
+      } else {
+        tobe.classList.remove('theme-midnight');
+        tobe.classList.add('theme-pastel');
+        btnPastel.className = 'px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-400/50 bg-amber-500/20 text-amber-200 transition';
+        btnMidnight.className = 'px-3 py-1.5 rounded-lg text-xs font-medium border border-white/10 bg-white/5 text-slate-300 hover:text-white transition';
+      }
+    }
+
+    // Toggle Refined Essay vs Raw STT Text
+    function toggleTextMode(mode) {
+      const refined = document.getElementById('diary-content-refined');
+      const raw = document.getElementById('diary-content-raw');
+      const btnRefined = document.getElementById('btn-text-refined');
+      const btnRaw = document.getElementById('btn-text-raw');
+
+      if (mode === 'refined') {
+        refined.classList.remove('hidden');
+        raw.classList.add('hidden');
+        btnRefined.style.backgroundColor = 'var(--m-accent)';
+        btnRefined.style.color = '#121316';
+        btnRaw.style.backgroundColor = 'transparent';
+        btnRaw.style.color = 'var(--m-text-secondary)';
+      } else {
+        refined.classList.add('hidden');
+        raw.classList.remove('hidden');
+        btnRaw.style.backgroundColor = 'var(--m-accent)';
+        btnRaw.style.color = '#121316';
+        btnRefined.style.backgroundColor = 'transparent';
+        btnRefined.style.color = 'var(--m-text-secondary)';
+      }
+    }
+
+    // Pause Demo in Recording View
+    let isPaused = false;
+    function togglePauseDemo() {
+      isPaused = !isPaused;
+      const label = document.getElementById('pause-label');
+      const bars = document.querySelectorAll('.wave-bar');
+      label.textContent = isPaused ? '이어서 녹음' : '잠시 멈춤';
+      bars.forEach(b => {
+        b.style.animationPlayState = isPaused ? 'paused' : 'running';
+      });
+    }
+
+    // AS-IS Recording Button Demo
+    let asisRec = false;
+    function toggleAsIsRecording() {
+      asisRec = !asisRec;
+      const btn = document.getElementById('asis-record-btn');
+      if (asisRec) {
+        btn.textContent = 'Stop Recording 🛑';
+        btn.style.backgroundColor = '#f44336';
+      } else {
+        btn.textContent = 'Start Recording';
+        btn.style.backgroundColor = '#4CAF50';
+      }
+    }
+
+    // Audio Replay Demo
+    let playing = false;
+    function toggleAudioPlay() {
+      playing = !playing;
+      const btn = document.getElementById('btn-audio-play');
+      btn.textContent = playing ? '⏸' : '▶';
+    }
+  </script>
+</body>
+</html>

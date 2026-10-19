@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: meari-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-meari}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Please set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-meari_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - meari_pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: meari-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Please set MINIO_ROOT_PASSWORD in .env}
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - meari_miniodata:/data
+    restart: unless-stopped
+
+volumes:
+  meari_pgdata:
+  meari_miniodata:
