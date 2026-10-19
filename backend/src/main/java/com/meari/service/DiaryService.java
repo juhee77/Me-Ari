@@ -1,27 +1,69 @@
 package com.meari.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.meari.domain.Diary;
+import com.meari.dto.DiaryResponse;
+import com.meari.dto.DiarySaveRequest;
+import com.meari.repository.DiaryRepository;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.util.Map;
 
 @Service
 public class DiaryService {
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
+    private final DiaryRepository diaryRepository;
+    private final String whisperUrl;
+    private final String ollamaUrl;
+    private final String ollamaModel;
 
-    public DiaryService(ObjectMapper objectMapper) {
+    public DiaryService(
+            DiaryRepository diaryRepository,
+            @Value("${meari.ai.whisper-url:http://localhost:8000}") String whisperUrl,
+            @Value("${meari.ai.ollama-url:http://localhost:11434}") String ollamaUrl,
+            @Value("${meari.ai.ollama-model:gemma2:2b}") String ollamaModel
+    ) {
         this.restClient = RestClient.create();
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
+        this.diaryRepository = diaryRepository;
+        this.whisperUrl = whisperUrl;
+        this.ollamaUrl = ollamaUrl;
+        this.ollamaModel = ollamaModel;
+    }
+
+    @Transactional
+    public DiaryResponse saveDiary(DiarySaveRequest request) {
+        Diary diary = new Diary(
+                request.title(),
+                request.rawText(),
+                request.refinedText(),
+                request.emotion(),
+                request.score(),
+                request.audioUrl(),
+                request.imageUrl()
+        );
+        Diary saved = diaryRepository.save(diary);
+        return DiaryResponse.from(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DiaryResponse> getAllDiaries() {
+        return diaryRepository.findAllByOrderByCreatedAtDesc()
+                .stream()
+                .map(DiaryResponse::from)
+                .toList();
     }
 
     public String transcribeAudio(MultipartFile file) throws IOException {
@@ -33,9 +75,8 @@ public class DiaryService {
             }
         });
 
-        // Call FastAPI Whisper proxy
         String response = restClient.post()
-                .uri("http://localhost:8000/api/transcribe")
+                .uri(whisperUrl + "/api/transcribe")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(parts)
                 .retrieve()
@@ -55,16 +96,15 @@ public class DiaryService {
                 + "출력은 반드시 JSON 형식으로 해주세요. 예시: {\"refinedText\": \"...\", \"emotion\": \"기쁨\", \"score\": 80}";
 
         Map<String, Object> requestBody = Map.of(
-                "model", "gemma2:2b",
+                "model", ollamaModel,
                 "prompt", prompt,
                 "stream", false,
                 "format", "json"
         );
 
         try {
-            // Call local Ollama API
             String response = restClient.post()
-                    .uri("http://localhost:11434/api/generate")
+                    .uri(ollamaUrl + "/api/generate")
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(requestBody)
                     .retrieve()
@@ -72,8 +112,7 @@ public class DiaryService {
 
             JsonNode root = objectMapper.readTree(response);
             String responseText = root.path("response").asText();
-            
-            // The response itself should be a JSON string due to format: json
+
             JsonNode resultNode = objectMapper.readTree(responseText);
             return Map.of(
                     "refinedText", resultNode.path("refinedText").asText(),
