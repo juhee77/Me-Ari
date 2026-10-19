@@ -3,6 +3,7 @@ package com.meari.controller;
 import com.meari.dto.DiaryResponse;
 import com.meari.dto.DiarySaveRequest;
 import com.meari.service.DiaryService;
+import com.meari.service.StorageService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +22,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class DiaryController {
 
     private final DiaryService diaryService;
+    private final StorageService storageService;
 
-    public DiaryController(DiaryService diaryService) {
+    public DiaryController(DiaryService diaryService, StorageService storageService) {
         this.diaryService = diaryService;
+        this.storageService = storageService;
     }
 
     @GetMapping
@@ -43,8 +46,13 @@ public class DiaryController {
             return ResponseEntity.badRequest().body(Map.of("error", "Audio file is required"));
         }
         try {
+            String audioUrl = storageService.uploadAudio(file);
             String transcribedText = diaryService.transcribeAudio(file);
-            return ResponseEntity.ok(Map.of("message", "Audio transcribed successfully", "text", transcribedText));
+            return ResponseEntity.ok(Map.of(
+                    "message", "Audio uploaded and transcribed successfully",
+                    "text", transcribedText,
+                    "audioUrl", audioUrl
+            ));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", "Failed to process audio upload"));
         }
